@@ -11,9 +11,15 @@ To install this source,
 Plug 'tani/ddc-path',
 
 call ddc#custom#patch_global('sources', ['path'])
+call ddc#custom#patch_global('sourceOptions', {
+      \   'path': {'mark': 'P'},
+      \ })
 call ddc#custom#patch_global('sourceParams', {
-\   'path': { 'mark': 'P', 'cmd': ['fd', '--max-depth', '5'] } "or ['find', '-maxdepth', '5']
-\ })
+      \   'path': {
+      \     'cmd': ['fd', '--max-depth', '5'],
+      \   }
+      \ })
+      " or  'cmd': ['find', '-maxdepth', '5'],
 ```
 
 Copyright (c) 2021 TANIGUCHI Masaya. All rights reserved.
