@@ -10,7 +10,7 @@ import {
   GatherCandidatesArguments,
   GetCompletePositionArguments,
 } from "https://lib.deno.dev/x/ddc_vim@v0/base/source.ts";
-import * as fn from "https://deno.land/x/denops_std@v2.1.1/function/mod.ts";
+import * as fn from "https://deno.land/x/denops_std@v3.3.0/function/mod.ts";
 
 type UserData = Record<string, never>;
 type Params = {
