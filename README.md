@@ -7,11 +7,11 @@ sharkdp/fd is a simple, fast and user-friendly alternative to 'find' .
 
 To install this source,
 
-```viml
+```vim
 Plug 'tani/ddc-path',
 
-ddc#custom#patch_global('sources', ['ddc-path'])
-ddc#custom#patch_global('sourceParams', {
+call ddc#custom#patch_global('sources', ['path'])
+call ddc#custom#patch_global('sourceParams', {
 \   'path': { 'mark': 'P', 'cmd': ['fd', '--max-depth', '5'] } "or ['find', '-maxdepth', '5']
 \ })
 ```
