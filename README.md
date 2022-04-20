@@ -3,7 +3,7 @@
 Path completion for ddc.vim.
 This source collects path names with GNU find or sharkdp/fd.
 
-sharkdp/fd is a simple, fast and user-friendly alternative to 'find' .
+'sharkdp/fd' is a simple, fast and user-friendly alternative to 'find'.
 
 To install this source,
 
