@@ -11,10 +11,13 @@ import {
   GetCompletePositionArguments,
 } from "https://deno.land/x/ddc_vim@v2.2.0/base/source.ts";
 import * as fn from "https://deno.land/x/denops_std@v3.3.0/function/mod.ts";
+import type { Denops } from "https://deno.land/x/denops_std@v3.3.0/mod.ts";
 
 type UserData = Record<string, never>;
+type DirSeparator = "slash" | "backslash";
 type Params = {
   cmd: string[];
+  dirSeparator: DirSeparator | "";
 };
 
 function isValidUnixPath(path: string): boolean {
@@ -45,21 +48,37 @@ export class Source extends BaseSource<Params, UserData> {
   }
 
   override async gather(
-    args: GatherArguments<Params>,
+    { denops, sourceParams }: GatherArguments<Params>,
   ): Promise<DdcGatherItems<UserData>> {
     const decoder = new TextDecoder();
-    const cwd = await fn.getcwd(args.denops) as string;
+    let cwd = await fn.getcwd(denops) as string;
     const proc = Deno.run({
       cwd,
-      cmd: args.sourceParams.cmd,
+      cmd: sourceParams.cmd,
       stdout: "piped",
       stderr: "null",
     });
     const output = await proc.output();
-    const text = decoder.decode(output);
-    return text.split("\n").map((item) => ({
-      word: `${cwd.trim()}/${item.trim().replace(/^\.\//, '')}`.replaceAll(" ", "\\ "),
-      abbr: `${cwd.trim()}/${item.trim().replace(/^\.\//, '')}`,
+    let text = decoder.decode(output);
+
+    // fix Windows directory separator to Unix
+    if (Deno.build.os === "windows") {
+      cwd = cwd.replaceAll("\\", "/");
+      text = text.replaceAll("\\", "/");
+    }
+
+    let words = text.split("\n").map((word) =>
+      `${cwd}/${word.replace(/^\.\//, "")}`
+    );
+
+    // change directory separator to backslash
+    if (await this._getDirSeparator(denops, sourceParams) === "backslash") {
+      words = words.map((word) => word.replaceAll("/", "\\"));
+    }
+
+    return words.map((word) => ({
+      word: word.replaceAll(" ", "\\ "),
+      abbr: word,
     }));
   }
 
@@ -67,6 +86,22 @@ export class Source extends BaseSource<Params, UserData> {
     return {
       // cmd: ["fd", "--max-depth", "3"]
       cmd: ["find", "-maxdepth", "3"],
+      dirSeparator: "",
     };
+  }
+
+  private async _getDirSeparator(
+    denops: Denops,
+    sourceParams: Params,
+  ): Promise<DirSeparator> {
+    const { dirSeparator } = sourceParams;
+    if (dirSeparator === "slash" || dirSeparator === "backslash") {
+      return dirSeparator;
+    }
+    return await denops.eval(
+      "!exists('+completeslash') ? 'slash' :" +
+        "&completeslash !=# '' ? &completeslash :" +
+        "&shellslash ? 'slash' : 'backslash'",
+    ) as DirSeparator;
   }
 }
