@@ -54,6 +54,13 @@ EXAMPLES						*ddc-path-examples*
 ==============================================================================
 PARAMS							*ddc-path-params*
 
+						     *ddc-path-param-absolute*
+absolute	(boolean)
+	If it is true, returns absolute path.
+	Otherwise, returns relative path from the current directory.
+
+	Default: v:true
+
 							  *ddc-path-param-cmd*
 cmd		(string[])
 	An array of 'find' program arguments.

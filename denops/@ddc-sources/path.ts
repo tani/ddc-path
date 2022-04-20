@@ -17,6 +17,7 @@ type UserData = Record<string, never>;
 type DirSeparator = "slash" | "backslash";
 type Params = {
   cmd: string[];
+  absolute: boolean;
   dirSeparator: DirSeparator | "";
 };
 
@@ -67,9 +68,12 @@ export class Source extends BaseSource<Params, UserData> {
       text = text.replaceAll("\\", "/");
     }
 
-    let words = text.split("\n").map((word) =>
-      `${cwd}/${word.replace(/^\.\//, "")}`
-    );
+    let words = text.split("\n").map((word) => word.replace(/^\.\//, ""));
+
+    // change relative path to absolute
+    if (sourceParams.absolute) {
+      words = words.map((word) => `${cwd}/${word}`);
+    }
 
     // change directory separator to backslash
     if (await this._getDirSeparator(denops, sourceParams) === "backslash") {
@@ -86,6 +90,7 @@ export class Source extends BaseSource<Params, UserData> {
     return {
       // cmd: ["fd", "--max-depth", "3"]
       cmd: ["find", "-maxdepth", "3"],
+      absolute: true,
       dirSeparator: "",
     };
   }
