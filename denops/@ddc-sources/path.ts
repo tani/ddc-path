@@ -4,12 +4,12 @@
  */
 import {
   BaseSource,
-  Candidate,
-} from "https://lib.deno.dev/x/ddc_vim@v0/types.ts";
+  DdcGatherItems,
+} from "https://deno.land/x/ddc_vim@v2.2.0/types.ts";
 import {
-  GatherCandidatesArguments,
+  GatherArguments,
   GetCompletePositionArguments,
-} from "https://lib.deno.dev/x/ddc_vim@v0/base/source.ts";
+} from "https://deno.land/x/ddc_vim@v2.2.0/base/source.ts";
 import * as fn from "https://deno.land/x/denops_std@v3.3.0/function/mod.ts";
 
 type UserData = Record<string, never>;
@@ -43,9 +43,10 @@ export class Source extends BaseSource<Params, UserData> {
     }
     return Promise.resolve(arg.context.input.length);
   }
-  override async gatherCandidates(
-    args: GatherCandidatesArguments<Params>,
-  ): Promise<Candidate<UserData>[]> {
+
+  override async gather(
+    args: GatherArguments<Params>,
+  ): Promise<DdcGatherItems<UserData>> {
     const decoder = new TextDecoder();
     const cwd = await fn.getcwd(args.denops) as string;
     const proc = Deno.run({
@@ -59,9 +60,9 @@ export class Source extends BaseSource<Params, UserData> {
     return text.split("\n").map((item) => ({
       word: `${cwd.trim()}/${item.trim().replace(/^\.\//, '')}`.replaceAll(" ", "\\ "),
       abbr: `${cwd.trim()}/${item.trim().replace(/^\.\//, '')}`,
-      mark: "path",
     }));
   }
+
   params(): Params {
     return {
       // cmd: ["fd", "--max-depth", "3"]
