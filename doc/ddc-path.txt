@@ -1,29 +1,65 @@
-ddc-path.txt
-
-================================================================================
-CONTENTS                                                       *ddc-path-contents*
-
-1. ddc-path....................................................|ddc-path-ddc-path|
-
-================================================================================
-DDC-PATH                                                       *ddc-path-ddc-path*
-
-Path completion for ddc.vim.
-This source collects path names with GNU find or sharkdp/fd.
-
-sharkdp/fd is a simple, fast and user-friendly alternative to 'find' .
-
-To install this source,
->
-    Plug 'tani/ddc-path',
-    call ddc#custom#patch_global('sources', ['path'])
-    call ddc#custom#patch_global('sourceParams', {
-    \   'path': { 'mark': 'P', 'cmd': ['fd', '--max-depth', '5'] } "or ['find', '-maxdepth', '5']
-    \ })
-<
+*ddc-path.txt*	Path completion for ddc.vim
 
 Copyright (c) 2021 TANIGUCHI Masaya. All rights reserved.
 
 This work is licensed under the MIT license.
 git.io/mit-license
 
+CONTENTS						*ddc-path-contents*
+
+Introduction	|ddc-path-introduction|
+Install		|ddc-path-install|
+Examples	|ddc-path-examples|
+Params		|ddc-path-params|
+
+
+==============================================================================
+INTRODUCTION						*ddc-path-introduction*
+
+Path completion for ddc.vim.
+This source collects path names with GNU find or sharkdp/fd.
+
+'sharkdp/fd' is a simple, fast and user-friendly alternative to 'find'.
+
+
+==============================================================================
+INSTALL							*ddc-path-install*
+
+Please install both "ddc.vim" and "denops.vim".
+
+https://github.com/Shougo/ddc.vim
+https://github.com/vim-denops/denops.vim
+
+Use your preferred plugin manager.
+>
+	Plug 'tani/ddc-path',
+<
+
+==============================================================================
+EXAMPLES						*ddc-path-examples*
+
+>
+	call ddc#custom#patch_global('sources', ['path'])
+	call ddc#custom#patch_global('sourceOptions', {
+	      \   'path': {'mark': 'P'},
+	      \ })
+	call ddc#custom#patch_global('sourceParams', {
+	      \   'path': {
+	      \     'cmd': ['fd', '--max-depth', '5'],
+	      \   }
+	      \ })
+	      " or  'cmd': ['find', '-maxdepth', '5'],
+<
+
+==============================================================================
+PARAMS							*ddc-path-params*
+
+							  *ddc-path-param-cmd*
+cmd		(string[])
+	An array of 'find' program arguments.
+
+	Default: ["find", "-maxdepth", "5"]
+
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:noet:fen:noet:
