@@ -19,33 +19,68 @@ type Params = {
   cmd: string[];
   absolute: boolean;
   dirSeparator: DirSeparator | "";
+  escapeChars: string;
 };
+type WordFilter = (word: string) => string;
 
-function isValidUnixPath(path: string): boolean {
-  let escape = false;
-  for (let i = 0; i < path.length; i++) {
-    if (!escape && path[i].match(/\s/)) {
+function isValidUnixPath(path: string, escapeChars: string): boolean {
+  for (let i = 0; i < path.length; ++i) {
+    if (
+      path[i] === "\\" && (i + 1) < path.length &&
+      escapeChars.includes(path[i + 1])
+    ) {
+      ++i;
+    } else if (escapeChars.includes(path[i])) {
       return false;
-    }
-    if (path[i] === "\\") {
-      escape = !escape;
-    } else {
-      escape = false;
     }
   }
   return true;
 }
 
+function isValidWindowsPath(path: string, escapeChars: string): boolean {
+  // allow both '/' and '\'
+  const invalidChars = ':*?"<>|' + escapeChars;
+  let i = 0;
+  if (/^[a-zA-Z]:/.test(path)) {
+    i = 2;
+  }
+  for (; i < path.length; ++i) {
+    if (
+      path[i] === "\\" && (i + 1) < path.length &&
+      escapeChars.includes(path[i + 1])
+    ) {
+      ++i;
+    } else if (invalidChars.includes(path[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function getWordFilter(escapeChars: string): WordFilter {
+  if (escapeChars.length === 0) {
+    return (word) => word;
+  }
+  const escapeRegex = new RegExp(
+    `[${escapeChars.replaceAll(/[-\\\]]/g, "\\$&")}]`,
+    "g",
+  );
+  return (word) => word.replaceAll(escapeRegex, "\\$&");
+}
+
 export class Source extends BaseSource<Params, UserData> {
-  override getCompletePosition(
-    arg: GetCompletePositionArguments<Params>,
+  override async getCompletePosition(
+    { context, denops, sourceParams }: GetCompletePositionArguments<Params>,
   ): Promise<number> {
-    for (let i = 0; i < arg.context.input.length; i++) {
-      if (isValidUnixPath(arg.context.input.slice(i))) {
-        return Promise.resolve(i);
+    const isValidPath = Deno.build.os === "windows"
+      ? isValidWindowsPath
+      : isValidUnixPath;
+    for (let i = 0; i < context.input.length; i++) {
+      if (isValidPath(context.input.slice(i), sourceParams.escapeChars)) {
+        return i;
       }
     }
-    return Promise.resolve(arg.context.input.length);
+    return context.input.length;
   }
 
   override async gather(
@@ -80,8 +115,9 @@ export class Source extends BaseSource<Params, UserData> {
       words = words.map((word) => word.replaceAll("/", "\\"));
     }
 
+    const wordFilter = getWordFilter(sourceParams.escapeChars);
     return words.map((word) => ({
-      word: word.replaceAll(" ", "\\ "),
+      word: wordFilter(word),
       abbr: word,
     }));
   }
@@ -92,6 +128,7 @@ export class Source extends BaseSource<Params, UserData> {
       cmd: ["find", "-maxdepth", "3"],
       absolute: true,
       dirSeparator: "",
+      escapeChars: " ",
     };
   }
 
@@ -110,3 +147,9 @@ export class Source extends BaseSource<Params, UserData> {
     ) as DirSeparator;
   }
 }
+
+export const _internals = {
+  getWordFilter,
+  isValidUnixPath,
+  isValidWindowsPath,
+};
