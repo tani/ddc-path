@@ -11,6 +11,7 @@ import {
   GetCompletePositionArguments,
 } from "https://deno.land/x/ddc_vim@v2.2.0/base/source.ts";
 import * as fn from "https://deno.land/x/denops_std@v3.3.0/function/mod.ts";
+import * as op from "https://deno.land/x/denops_std@v3.3.0/option/mod.ts";
 import type { Denops } from "https://deno.land/x/denops_std@v3.3.0/mod.ts";
 
 type UserData = Record<string, never>;
@@ -106,7 +107,7 @@ export class Source extends BaseSource<Params, UserData> {
     }
 
     // change directory separator to backslash
-    if (await this._getDirSeparator(denops, sourceParams) === "backslash") {
+    if (await this.getDirSeparator(denops, sourceParams) === "backslash") {
       words = words.map((word) => word.replaceAll("/", "\\"));
     }
 
@@ -127,7 +128,7 @@ export class Source extends BaseSource<Params, UserData> {
     };
   }
 
-  private async _getDirSeparator(
+  private async getDirSeparator(
     denops: Denops,
     sourceParams: Params,
   ): Promise<DirSeparator> {
@@ -135,11 +136,14 @@ export class Source extends BaseSource<Params, UserData> {
     if (dirSeparator === "slash" || dirSeparator === "backslash") {
       return dirSeparator;
     }
-    return await denops.eval(
-      "!exists('+completeslash') ? 'slash' :" +
-        "&completeslash !=# '' ? &completeslash :" +
-        "&shellslash ? 'slash' : 'backslash'",
-    ) as DirSeparator;
+    if (!await fn.exists(denops, "+completeslash")) {
+      return "slash";
+    }
+    const completeslash = await op.completeslash.get(denops);
+    if (completeslash !== "") {
+      return completeslash as DirSeparator;
+    }
+    return await op.shellslash.get(denops) ? "slash" : "backslash";
   }
 }
 
