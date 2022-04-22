@@ -56,8 +56,8 @@ PARAMS							*ddc-path-params*
 
 						     *ddc-path-param-absolute*
 absolute	(boolean)
-	If it is true, returns absolute path.
-	Otherwise, returns relative path from the current directory.
+	If it is true, the corrected paths are converted to absolute.
+	Otherwise, paths are relative from the current directory.
 
 	Default: v:true
 
