@@ -19,7 +19,7 @@ INTRODUCTION						*ddc-path-introduction*
 Path completion for ddc.vim.
 This source collects path names with GNU find or sharkdp/fd.
 
-'sharkdp/fd' is a simple, fast and user-friendly alternative to 'find'.
+"sharkdp/fd" is a simple, fast and user-friendly alternative to "find".
 
 
 ==============================================================================
@@ -54,11 +54,41 @@ EXAMPLES						*ddc-path-examples*
 ==============================================================================
 PARAMS							*ddc-path-params*
 
+						     *ddc-path-param-absolute*
+absolute	(boolean)
+	If it is true, the corrected paths are converted to absolute.
+	Otherwise, paths are relative from the current directory.
+
+	Default: v:true
+
 							  *ddc-path-param-cmd*
 cmd		(string[])
-	An array of 'find' program arguments.
+	An array of "find" program arguments.
 
 	Default: ["find", "-maxdepth", "5"]
+
+						 *ddc-path-param-dirSeparator*
+dirSeparator	("slash" | "backslash" | "")
+		{for MS-Windows}
+	Change the directory separator to a forward or backward slash.
+
+	  slash		A forward slash is used.
+	  backslash	A backward slash is used.
+	  (empty)	Auto detect by:
+			- When 'completeslash' is not empty, the value is
+			  used for this option.
+			- When 'shellslash' is enabled, "slash" is used.
+			- When 'noshellslash', "backslash" is used.
+
+	default: ""
+
+						  *ddc-path-param-escapeChars*
+escapeChars	(string)
+	Escape the characters in this value that occur in result with a
+	backslash.
+	If you want to use the result in |command-mode|, you should set " #%".
+
+	Default: " "
 
 
 ==============================================================================
