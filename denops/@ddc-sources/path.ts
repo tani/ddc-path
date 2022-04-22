@@ -58,13 +58,8 @@ function isValidWindowsPath(path: string, escapeChars: string): boolean {
 }
 
 function getWordFilter(escapeChars: string): WordFilter {
-  if (escapeChars.length === 0) {
-    return (word) => word;
-  }
-  const escapeRegex = new RegExp(
-    `[${escapeChars.replaceAll(/[-\\\]]/g, "\\$&")}]`,
-    "g",
-  );
+  const regexpsrc = `[${escapeChars.replaceAll(/[-\\\]]/g, "\\$&")}]`
+  const escapeRegex = new RegExp(regexpsrc, "g");
   return (word) => word.replaceAll(escapeRegex, "\\$&");
 }
 
