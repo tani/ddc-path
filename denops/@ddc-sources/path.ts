@@ -22,6 +22,7 @@ type Params = {
   dirSeparator: DirSeparator | "";
   escapeChars: string;
 };
+type PathChecker = (path: string) => boolean;
 type WordFilter = (word: string) => string;
 
 function isValidUnixPath(path: string, escapeChars: string): boolean {
@@ -58,6 +59,16 @@ function isValidWindowsPath(path: string, escapeChars: string): boolean {
   return true;
 }
 
+function getCompletePosition(input: string, isPath: PathChecker): number {
+  // skip leading whitespace
+  const startIndex = input.search(/\S/);
+  const trimedInput = startIndex < 0 ? "" : input.slice(startIndex);
+  const index = Array.from(trimedInput).findIndex((_, i) =>
+    isPath(trimedInput.slice(i))
+  );
+  return index < 0 ? input.length : (startIndex + index);
+}
+
 function getWordFilter(escapeChars: string): WordFilter {
   const regexpsrc = `[${escapeChars.replaceAll(/[-\\\]]/g, "\\$&")}]`
   const escapeRegex = new RegExp(regexpsrc, "g");
@@ -65,18 +76,16 @@ function getWordFilter(escapeChars: string): WordFilter {
 }
 
 export class Source extends BaseSource<Params, UserData> {
-  override async getCompletePosition(
-    { context, denops, sourceParams }: GetCompletePositionArguments<Params>,
+  override getCompletePosition(
+    { context, sourceParams }: GetCompletePositionArguments<Params>,
   ): Promise<number> {
     const isValidPath = Deno.build.os === "windows"
       ? isValidWindowsPath
       : isValidUnixPath;
-    for (let i = 0; i < context.input.length; i++) {
-      if (isValidPath(context.input.slice(i), sourceParams.escapeChars)) {
-        return i;
-      }
-    }
-    return context.input.length;
+    const { escapeChars } = sourceParams;
+    const isPath = (path: string) => isValidPath(path, escapeChars);
+    const index = getCompletePosition(context.input, isPath);
+    return Promise.resolve(index);
   }
 
   override async gather(
@@ -148,6 +157,7 @@ export class Source extends BaseSource<Params, UserData> {
 }
 
 export const _internals = {
+  getCompletePosition,
   getWordFilter,
   isValidUnixPath,
   isValidWindowsPath,
