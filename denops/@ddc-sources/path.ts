@@ -5,14 +5,14 @@
 import {
   BaseSource,
   DdcGatherItems,
-} from "https://deno.land/x/ddc_vim@v2.2.0/types.ts";
+} from "https://lib.deno.dev/x/ddc_vim@v4/types.ts";
 import {
   GatherArguments,
   GetCompletePositionArguments,
-} from "https://deno.land/x/ddc_vim@v2.2.0/base/source.ts";
-import * as fn from "https://deno.land/x/denops_std@v3.3.0/function/mod.ts";
-import * as op from "https://deno.land/x/denops_std@v3.3.0/option/mod.ts";
-import type { Denops } from "https://deno.land/x/denops_std@v3.3.0/mod.ts";
+} from "https://lib.deno.dev/x/ddc_vim@v4/base/source.ts";
+import * as fn from "https://lib.deno.dev/x/denops_std@v5/function/mod.ts";
+import * as op from "https://lib.deno.dev/x/denops_std@v5/option/mod.ts";
+import type { Denops } from "https://lib.deno.dev/x/denops_std@v5/mod.ts";
 
 type UserData = Record<string, never>;
 type DirSeparator = "slash" | "backslash";
