@@ -2,21 +2,20 @@
  * Copyright (c) 2021 TANIGUCHI Masaya. All rights reserved.
  * This work is licensed under the MIT license. git.io/mit-license
  */
+import type { DdcGatherItems } from "@shougo/ddc-vim/types";
 import {
   BaseSource,
-  DdcGatherItems,
-} from "https://lib.deno.dev/x/ddc_vim@v4/types.ts";
-import {
-  GatherArguments,
-  GetCompletePositionArguments,
-} from "https://lib.deno.dev/x/ddc_vim@v4/base/source.ts";
-import * as fn from "https://lib.deno.dev/x/denops_std@v5/function/mod.ts";
-import * as op from "https://lib.deno.dev/x/denops_std@v5/option/mod.ts";
-import type { Denops } from "https://lib.deno.dev/x/denops_std@v5/mod.ts";
+  type GatherArguments,
+  type GetCompletePositionArguments,
+} from "@shougo/ddc-vim/source";
+
+import type { Denops } from "@denops/std";
+import * as fn from "@denops/std/function";
+import * as op from "@denops/std/option";
 
 type UserData = Record<string, never>;
-type DirSeparator = "slash" | "backslash";
-type Params = {
+export type DirSeparator = "slash" | "backslash";
+export type Params = {
   cmd: string[];
   absolute: boolean;
   dirSeparator: DirSeparator | "";
@@ -70,7 +69,7 @@ function getCompletePosition(input: string, isPath: PathChecker): number {
 }
 
 function getWordFilter(escapeChars: string): WordFilter {
-  const regexpsrc = `[${escapeChars.replaceAll(/[-\\\]]/g, "\\$&")}]`
+  const regexpsrc = `[${escapeChars.replaceAll(/[-\\\]]/g, "\\$&")}]`;
   const escapeRegex = new RegExp(regexpsrc, "g");
   return (word) => word.replaceAll(escapeRegex, "\\$&");
 }
@@ -93,14 +92,18 @@ export class Source extends BaseSource<Params, UserData> {
   ): Promise<DdcGatherItems<UserData>> {
     const decoder = new TextDecoder();
     let cwd = await fn.getcwd(denops) as string;
-    const proc = Deno.run({
+    const [cmd, ...args] = sourceParams.cmd;
+    if (!cmd) {
+      return [];
+    }
+    const proc = new Deno.Command(cmd, {
+      args,
       cwd,
-      cmd: sourceParams.cmd,
       stdout: "piped",
       stderr: "null",
-    });
+    }).spawn();
     const output = await proc.output();
-    let text = decoder.decode(output);
+    let text = decoder.decode(new Uint8Array(output.stdout));
 
     // fix Windows directory separator to Unix
     if (Deno.build.os === "windows") {

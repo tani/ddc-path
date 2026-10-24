@@ -1,6 +1,6 @@
-import { assertEquals } from "https://deno.land/std@0.136.0/testing/asserts.ts";
-import { describe, it } from "https://deno.land/x/test_suite@0.16.1/mod.ts";
-import { _internals } from "./path.ts";
+import { assertEquals } from "@std/assert/equals";
+import { describe, it } from "@std/testing/bdd";
+import { _internals } from "./main.ts";
 
 describe("getWordFilter()", () => {
   const parametrize = [

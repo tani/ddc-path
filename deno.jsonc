@@ -1,0 +1,14 @@
+{
+  "lock": false,
+  "workspace": [
+    "./denops/@ddc-sources/path"
+  ],
+  "tasks": {
+    "cache": "deno install --reload",
+    "check": "deno task --cwd denops/@ddc-sources/path check",
+    "fmt": "deno task --cwd denops/@ddc-sources/path fmt",
+    "lint": "deno task --cwd denops/@ddc-sources/path lint",
+    "lint-fix": "deno task --cwd denops/@ddc-sources/path lint-fix",
+    "test": "deno task --cwd denops/@ddc-sources/path test"
+  }
+}

@@ -1,0 +1,34 @@
+name: ci
+
+env:
+  DENO_VERSION: 2.x
+
+on:
+  push:
+    paths:
+      - "**.ts"
+      - "**.jsonc"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    paths:
+      - "**.ts"
+      - "**.jsonc"
+      - ".github/workflows/ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+      - name: Cache
+        run: deno task cache
+      - name: Check
+        run: deno task check
+      - name: Test
+        run: deno task test
